@@ -43,6 +43,12 @@ public class TxCleanupTask implements Handler<Long> {
 		checkTransactions();
 	}
 
+	/**
+	 * Check whether the provided stack trace contains committing methods.
+	 * 
+	 * @param stackTrace
+	 * @return
+	 */
 	private boolean isCommitting(StackTraceElement[] stackTrace) {
 		return Stream.of(stackTrace)
 			.map(ClassMethod::of)
