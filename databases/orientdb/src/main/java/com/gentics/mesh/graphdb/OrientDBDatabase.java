@@ -336,34 +336,7 @@ public class OrientDBDatabase extends AbstractDatabase {
 	@Override
 	@Deprecated
 	public Tx tx() {
-		return new OrientDBTx(boot.get(), txProvider, resolver);
-	}
-
-	@Override
-	public void blockingTopologyLockCheck() {
-		ClusterOptions clusterOptions = options.getClusterOptions();
-		long lockTimeout = clusterOptions.getTopologyLockTimeout();
-		if (clusterOptions.isEnabled() && clusterManager() != null && lockTimeout != 0) {
-			long start = System.currentTimeMillis();
-			long i = 0;
-			while (clusterManager().isClusterTopologyLocked()) {
-				long dur = System.currentTimeMillis() - start;
-				if (i % 250 == 0) {
-					log.info("Write operation locked due to topology lock. Locked since " + dur + "ms");
-				}
-				if (dur > lockTimeout) {
-					log.warn("Tx global lock timeout of {" + lockTimeout + "} reached.");
-					break;
-				}
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					log.error("Interrupting topology lock delay.", e);
-					break;
-				}
-				i++;
-			}
-		}
+		return new OrientDBTx(this, boot.get(), txProvider, resolver);
 	}
 
 	@Override
@@ -581,6 +554,33 @@ public class OrientDBDatabase extends AbstractDatabase {
 			plugin.updateCachedDatabaseConfiguration(GraphStorage.DB_NAME, newCfg, true);
 		} else {
 			throw error(BAD_REQUEST, "error_cluster_status_only_available_in_cluster_mode");
+		}
+	}
+
+	@Override
+	public void blockingTopologyLockCheck() {
+		ClusterOptions clusterOptions = options.getClusterOptions();
+		long lockTimeout = clusterOptions.getTopologyLockTimeout();
+		if (clusterOptions.isEnabled() && clusterManager() != null && lockTimeout != 0) {
+			long start = System.currentTimeMillis();
+			long i = 0;
+			while (clusterManager().isClusterTopologyLocked()) {
+				long dur = System.currentTimeMillis() - start;
+				if (i % 250 == 0) {
+					log.info("Write operation locked due to topology lock. Locked since " + dur + "ms");
+				}
+				if (dur > lockTimeout) {
+					log.warn("Tx global lock timeout of {" + lockTimeout + "} reached.");
+					break;
+				}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					log.error("Interrupting topology lock delay.", e);
+					break;
+				}
+				i++;
+			}
 		}
 	}
 
