@@ -12,6 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gentics.madl.tx.AbstractTx;
+import com.gentics.mesh.etc.config.GraphStorageOptions;
+import com.gentics.mesh.etc.config.MeshOptions;
 import com.gentics.mesh.util.Tuple;
 import com.google.common.collect.ImmutableSet;
 
@@ -29,9 +31,11 @@ public class TxCleanupTask implements Handler<Long> {
 	private static final Set<ClassMethod> interruptedMethods = ImmutableSet.of(
 		new ClassMethod(AbstractTx.class, "commit"));
 
-	@Inject
-	public TxCleanupTask() {
+	private GraphStorageOptions storageOptions;
 
+	@Inject
+	public TxCleanupTask(MeshOptions options) {
+		this.storageOptions = options.getStorageOptions();
 	}
 
 	@Override
@@ -49,13 +53,17 @@ public class TxCleanupTask implements Handler<Long> {
 	 * Check whether there are any transactions which exceed the set time limit.
 	 */
 	public void checkTransactions() {
+		log.info("Checking {} transaction threads", registeredThreads.size());
 		List<Thread> toInterrupt = registeredThreads.entrySet()
 			.stream().filter(entry -> {
 				long now = System.currentTimeMillis();
 				long dur = now - entry.getValue();
 				// TODO configure duration
-				boolean exceedsLimit = dur > 20_000;
-				log.info("Thread " + entry.getKey() + " exceeds time limit.");
+				long limit = 20_000;
+				boolean exceedsLimit = dur > limit;
+				if (exceedsLimit) {
+					log.info("Thread {} exceeds time limit of {} with duration {}.", entry.getKey(), limit, dur);
+				}
 				return exceedsLimit;
 			}).map(entry -> {
 				Thread t = entry.getKey();
@@ -67,7 +75,7 @@ public class TxCleanupTask implements Handler<Long> {
 
 		log.info("Interrupting {} threads", toInterrupt.size());
 		for (Thread thread : toInterrupt) {
-			log.info("Interrupting {}", thread.getName());
+			log.info("Interrupting transaction thread {}", thread.getName());
 			thread.interrupt();
 		}
 
