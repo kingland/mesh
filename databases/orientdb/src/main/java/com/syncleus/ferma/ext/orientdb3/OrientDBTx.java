@@ -10,6 +10,7 @@ import com.gentics.madl.tx.AbstractTx;
 import com.gentics.madl.tx.Tx;
 import com.gentics.mesh.Mesh;
 import com.gentics.mesh.cli.BootstrapInitializer;
+import com.gentics.mesh.graphdb.cluster.TxCleanupTask;
 import com.gentics.mesh.graphdb.spi.Database;
 import com.gentics.mesh.graphdb.tx.OrientStorage;
 import com.gentics.mesh.madl.tp3.mock.Element;
@@ -70,7 +71,13 @@ public class OrientDBTx extends AbstractTx<FramedTransactionalGraph> {
 			if (isSuccess()) {
 				try {
 					db.blockingTopologyLockCheck();
+					Thread t = Thread.currentThread();
+					TxCleanupTask.register(t);
+					try {
 					commit();
+					} finally {
+						TxCleanupTask.unregister(t);
+					}
 				} catch (Exception e) {
 					rollback();
 					throw e;
