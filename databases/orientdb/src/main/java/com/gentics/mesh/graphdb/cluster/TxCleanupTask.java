@@ -69,8 +69,7 @@ public class TxCleanupTask implements Handler<Long> {
 			.stream().filter(entry -> {
 				long now = System.currentTimeMillis();
 				long dur = now - entry.getValue();
-				// TODO configure duration
-				long limit = 20_000;
+				long limit = storageOptions.getTxCommitTimeout();
 				boolean exceedsLimit = dur > limit;
 				if (exceedsLimit) {
 					log.warn("Thread {} exceeds time limit of {} with duration {}.", entry.getKey(), limit, dur);
@@ -91,7 +90,6 @@ public class TxCleanupTask implements Handler<Long> {
 			log.info("Interrupting transaction thread {}", thread.getName());
 			thread.interrupt();
 		}
-
 	}
 
 	public static class ClassMethod {

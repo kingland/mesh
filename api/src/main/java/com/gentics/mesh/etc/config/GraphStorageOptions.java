@@ -23,6 +23,7 @@ public class GraphStorageOptions implements Option {
 	public static final boolean DEFAULT_SYNC_WRITES = true;
 	public static final int DEFAULT_TX_RETRY_DELAY = 10;
 	public static final int DEFAULT_TX_RETRY_LIMIT = 10;
+	public static final long DEFAULT_TX_COMMIT_TIMEOUT = 0;
 
 	public static final String MESH_GRAPH_DB_DIRECTORY_ENV = "MESH_GRAPH_DB_DIRECTORY";
 	public static final String MESH_GRAPH_BACKUP_DIRECTORY_ENV = "MESH_GRAPH_BACKUP_DIRECTORY";
@@ -31,6 +32,7 @@ public class GraphStorageOptions implements Option {
 	public static final String MESH_GRAPH_SYNC_WRITES_ENV = "MESH_GRAPH_SYNC_WRITES";
 	public static final String MESH_GRAPH_TX_RETRY_DELAY_ENV = "MESH_GRAPH_TX_RETRY_DELAY";
 	public static final String MESH_GRAPH_TX_RETRY_LIMIT_ENV = "MESH_GRAPH_TX_RETRY_LIMIT";
+	public static final String MESH_GRAPH_TX_COMMIT_TIMEOUT_ENV = "MESH_GRAPH_TX_COMMIT_TIMEOUT";
 
 	@JsonProperty(required = true)
 	@JsonPropertyDescription("Path to the graph database data directory.")
@@ -68,6 +70,12 @@ public class GraphStorageOptions implements Option {
 	@EnvironmentVariable(name = MESH_GRAPH_TX_RETRY_LIMIT_ENV, description = "Override the transaction retry limit. Default: "
 		+ DEFAULT_TX_RETRY_LIMIT)
 	private int txRetryLimit = DEFAULT_TX_RETRY_LIMIT;
+
+	@JsonProperty(defaultValue = DEFAULT_TX_COMMIT_TIMEOUT + " ms")
+	@JsonPropertyDescription("The transaction commit timeout in miliseconds. A timeout value of zero means that transaction commit operations will never timeout.")
+	@EnvironmentVariable(name = MESH_GRAPH_TX_COMMIT_TIMEOUT_ENV, description = "Override the transaction commit timeout. Default: "
+		+ DEFAULT_TX_COMMIT_TIMEOUT)
+	private long txCommitTimeout = DEFAULT_TX_COMMIT_TIMEOUT;
 
 	@JsonProperty(required = false)
 	@JsonPropertyDescription("Additional set of graph database parameters.")
@@ -158,10 +166,20 @@ public class GraphStorageOptions implements Option {
 		return this;
 	}
 
+	public long getTxCommitTimeout() {
+		return this.txCommitTimeout;
+	}
+
+	public GraphStorageOptions setTxCommitTimeout(long txCommitTimeout) {
+		this.txCommitTimeout = txCommitTimeout;
+		return this;
+	}
+
 	public void validate(MeshOptions meshOptions) {
 		if (getStartServer() && getDirectory() == null) {
 			throw new NullPointerException(
 				"You have not specified a data directory and enabled the graph server. It is not possible to run Gentics Mesh in memory mode and start the graph server.");
 		}
 	}
+
 }
