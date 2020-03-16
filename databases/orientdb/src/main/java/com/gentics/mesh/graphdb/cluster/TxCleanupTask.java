@@ -21,6 +21,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * Task which terminates stalled or long running commit operations.
+ */
 @Singleton
 public class TxCleanupTask implements Handler<Long> {
 
