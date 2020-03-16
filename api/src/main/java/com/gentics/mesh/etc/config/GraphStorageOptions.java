@@ -21,6 +21,7 @@ public class GraphStorageOptions implements Option {
 	public static final String DEFAULT_EXPORT_DIRECTORY = "data" + File.separator + "export";
 	public static final boolean DEFAULT_START_SERVER = false;
 	public static final boolean DEFAULT_SYNC_WRITES = true;
+	public static final long DEFAULT_SYNC_WRITES_TIMEOUT = 60_000;
 	public static final int DEFAULT_TX_RETRY_DELAY = 10;
 	public static final int DEFAULT_TX_RETRY_LIMIT = 10;
 	public static final long DEFAULT_TX_COMMIT_TIMEOUT = 0;
@@ -30,6 +31,7 @@ public class GraphStorageOptions implements Option {
 	public static final String MESH_GRAPH_EXPORT_DIRECTORY_ENV = "MESH_GRAPH_EXPORT_DIRECTORY";
 	public static final String MESH_GRAPH_STARTSERVER_ENV = "MESH_GRAPH_STARTSERVER";
 	public static final String MESH_GRAPH_SYNC_WRITES_ENV = "MESH_GRAPH_SYNC_WRITES";
+	public static final String MESH_GRAPH_SYNC_WRITES_TIMEOUT_ENV = "MESH_GRAPH_SYNC_WRITES_TIMEOUT";
 	public static final String MESH_GRAPH_TX_RETRY_DELAY_ENV = "MESH_GRAPH_TX_RETRY_DELAY";
 	public static final String MESH_GRAPH_TX_RETRY_LIMIT_ENV = "MESH_GRAPH_TX_RETRY_LIMIT";
 	public static final String MESH_GRAPH_TX_COMMIT_TIMEOUT_ENV = "MESH_GRAPH_TX_COMMIT_TIMEOUT";
@@ -58,6 +60,11 @@ public class GraphStorageOptions implements Option {
 	@JsonPropertyDescription("Flag which controls whether writes to the graph database should be synchronized. Default: " + DEFAULT_SYNC_WRITES)
 	@EnvironmentVariable(name = MESH_GRAPH_SYNC_WRITES_ENV, description = "Override the graph database sync writes flag.")
 	private boolean synchronizeWrites = DEFAULT_SYNC_WRITES;
+
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Set the timeout in miliseconds for the sync write lock. Default: " + DEFAULT_SYNC_WRITES_TIMEOUT)
+	@EnvironmentVariable(name = MESH_GRAPH_SYNC_WRITES_TIMEOUT_ENV, description = "Override the graph database sync write timeout.")
+	private long synchronizeWritesTimeout = DEFAULT_SYNC_WRITES_TIMEOUT;
 
 	@JsonProperty(defaultValue = DEFAULT_TX_RETRY_DELAY + "ms")
 	@JsonPropertyDescription("The delay in milliseconds when a transaction has to be retried.")
@@ -175,11 +182,21 @@ public class GraphStorageOptions implements Option {
 		return this;
 	}
 
+	public long getSynchronizeWritesTimeout() {
+		return synchronizeWritesTimeout;
+	}
+
+	public GraphStorageOptions setSynchronizeWritesTimeout(long synchronizeWritesTimeout) {
+		this.synchronizeWritesTimeout = synchronizeWritesTimeout;
+		return this;
+	}
+
 	public void validate(MeshOptions meshOptions) {
 		if (getStartServer() && getDirectory() == null) {
 			throw new NullPointerException(
 				"You have not specified a data directory and enabled the graph server. It is not possible to run Gentics Mesh in memory mode and start the graph server.");
 		}
 	}
+
 
 }
