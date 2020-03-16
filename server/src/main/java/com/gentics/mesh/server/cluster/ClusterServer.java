@@ -40,6 +40,7 @@ public class ClusterServer {
 		options.getStorageOptions().setSynchronizeWritesTimeout(90_000);
 		options.getClusterOptions().setTopologyLockTimeout(240_000);
 		options.getClusterOptions().setTopologyLockDelay(20_000);
+		options.getStorageOptions().setTxCommitTimeout(10_000);
 		return options;
 	}
 
