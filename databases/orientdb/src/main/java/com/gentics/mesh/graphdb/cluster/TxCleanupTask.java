@@ -59,7 +59,9 @@ public class TxCleanupTask implements Handler<Long> {
 	 * Check whether there are any transactions which exceed the set time limit.
 	 */
 	public void checkTransactions() {
-		log.info("Checking {} transaction threads", registeredThreads.size());
+		if (log.isDebugEnabled()) {
+			log.debug("Checking {} transaction threads", registeredThreads.size());
+		}
 		List<Thread> toInterrupt = registeredThreads.entrySet()
 			.stream().filter(entry -> {
 				long now = System.currentTimeMillis();
@@ -68,7 +70,7 @@ public class TxCleanupTask implements Handler<Long> {
 				long limit = 20_000;
 				boolean exceedsLimit = dur > limit;
 				if (exceedsLimit) {
-					log.info("Thread {} exceeds time limit of {} with duration {}.", entry.getKey(), limit, dur);
+					log.warn("Thread {} exceeds time limit of {} with duration {}.", entry.getKey(), limit, dur);
 				}
 				return exceedsLimit;
 			}).map(entry -> {
@@ -79,7 +81,9 @@ public class TxCleanupTask implements Handler<Long> {
 			.map(Tuple::v1)
 			.collect(Collectors.toList());
 
-		log.info("Interrupting {} threads", toInterrupt.size());
+		if (log.isDebugEnabled()) {
+			log.debug("Interrupting {} threads", toInterrupt.size());
+		}
 		for (Thread thread : toInterrupt) {
 			log.info("Interrupting transaction thread {}", thread.getName());
 			thread.interrupt();
