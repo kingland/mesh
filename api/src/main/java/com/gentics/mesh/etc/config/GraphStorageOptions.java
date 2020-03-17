@@ -62,7 +62,7 @@ public class GraphStorageOptions implements Option {
 	private boolean synchronizeWrites = DEFAULT_SYNC_WRITES;
 
 	@JsonProperty(required = true)
-	@JsonPropertyDescription("Set the timeout in miliseconds for the sync write lock. Default: " + DEFAULT_SYNC_WRITES_TIMEOUT)
+	@JsonPropertyDescription("Set the timeout in milliseconds for the sync write lock. Default: " + DEFAULT_SYNC_WRITES_TIMEOUT)
 	@EnvironmentVariable(name = MESH_GRAPH_SYNC_WRITES_TIMEOUT_ENV, description = "Override the graph database sync write timeout.")
 	private long synchronizeWritesTimeout = DEFAULT_SYNC_WRITES_TIMEOUT;
 
