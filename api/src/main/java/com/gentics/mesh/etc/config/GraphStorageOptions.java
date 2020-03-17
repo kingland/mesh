@@ -79,7 +79,7 @@ public class GraphStorageOptions implements Option {
 	private int txRetryLimit = DEFAULT_TX_RETRY_LIMIT;
 
 	@JsonProperty(defaultValue = DEFAULT_TX_COMMIT_TIMEOUT + " ms")
-	@JsonPropertyDescription("The transaction commit timeout in miliseconds. A timeout value of zero means that transaction commit operations will never timeout.")
+	@JsonPropertyDescription("The transaction commit timeout in milliseconds. A timeout value of zero means that transaction commit operations will never timeout.")
 	@EnvironmentVariable(name = MESH_GRAPH_TX_COMMIT_TIMEOUT_ENV, description = "Override the transaction commit timeout. Default: "
 		+ DEFAULT_TX_COMMIT_TIMEOUT)
 	private long txCommitTimeout = DEFAULT_TX_COMMIT_TIMEOUT;
